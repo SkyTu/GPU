@@ -9,7 +9,7 @@
 #include <thrust/sequence.h>
 #include <thrust/fill.h>
 #include <thrust/transform.h>
-
+#define MAX_THREADS_PER_BLOCK 32
 namespace kernel{
 template<typename T>
 __global__ void matrixMultiplication(const T *a, const T *b, T *c,
@@ -75,17 +75,30 @@ void matrixMultiplication(
 }
 }
 
-template<typename T>
-void matrixMultiplicationWrapper(
+namespace cpu{
+    template<typename T>
+    void matrixMultiplication(
         std::vector<T> a, std::vector<T> b, std::vector<T> c,
         bool transpose_a, bool transpose_b,
-        size_t a_rows, size_t a_cols, size_t b_rows, size_t b_cols) {
-    thrust::device_vector<T> gpu_a(a.begin(), a.end());
-    thrust::device_vector<T> gpu_b(b.begin(), b.end());
-    thrust::device_vector<T> gpu_c(c.begin(), c.end());
+        size_t a_rows, size_t a_cols, size_t b_rows, size_t b_cols){
+            thrust::device_vector<T> gpu_a(a.begin(), a.end());
+            thrust::device_vector<T> gpu_b(b.begin(), b.end());
+            thrust::device_vector<T> gpu_c(c.begin(), c.end());
 
-    gpu::matrixMultiplication(
-        &gpu_a, &gpu_b, &gpu_c,
-        transpose_a, transpose_b, a_rows, a_cols, b_rows, b_cols
-    );
+            gpu::matrixMultiplication(
+                &gpu_a, &gpu_b, &gpu_c,
+                transpose_a, transpose_b, a_rows, a_cols, b_rows, b_cols
+            );
+        }
 }
+
+template<typename T, typename I>
+void matrixMultiplicationWrapper(
+        std::vector<T> a, std::vector<T> b, std::vector<T> c, bool transpose_a, bool transpose_b, I a_rows, I a_cols, I b_rows, I b_cols) {
+    cpu::matrixMultiplication(a, b, c, transpose_a, transpose_b, a_rows, a_cols, b_rows, b_cols);
+}
+
+void matrixMultiplicationWrapper(std::vector<uint64_t> a, std::vector<uint64_t> b, std::vector<uint64_t> c, bool transpose_a, 
+    bool transpose_b, size_t a_rows, size_t a_cols, size_t b_rows, size_t b_cols){
+        cpu::matrixMultiplication(a, b, c, transpose_a, transpose_b, a_rows, a_cols, b_rows, b_cols);
+    }
