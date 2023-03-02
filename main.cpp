@@ -1,5 +1,8 @@
-#include "matrix_mul.cuh"
+#include "matrix_mul.h"
 #include <stdint.h>
+
+
+
 int main()
 {
     uint64_t A_COL = 6;

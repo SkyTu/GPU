@@ -1,4 +1,4 @@
-#include "matrix_mul.cuh"
+#include "matrix_mul.h"
 #include <sys/time.h>
 #include <fstream>
 #include <iostream>
@@ -75,30 +75,38 @@ void matrixMultiplication(
 }
 }
 
-namespace cpu{
-    template<typename T>
-    void matrixMultiplication(
-        std::vector<T> a, std::vector<T> b, std::vector<T> c,
-        bool transpose_a, bool transpose_b,
-        size_t a_rows, size_t a_cols, size_t b_rows, size_t b_cols){
-            thrust::device_vector<T> gpu_a(a.begin(), a.end());
-            thrust::device_vector<T> gpu_b(b.begin(), b.end());
-            thrust::device_vector<T> gpu_c(c.begin(), c.end());
 
-            gpu::matrixMultiplication(
-                &gpu_a, &gpu_b, &gpu_c,
-                transpose_a, transpose_b, a_rows, a_cols, b_rows, b_cols
-            );
-        }
-}
+template<typename T>
+void matrixMultiplication(
+    std::vector<T> a, std::vector<T> b, std::vector<T> c,
+    bool transpose_a, bool transpose_b,
+    size_t a_rows, size_t a_cols, size_t b_rows, size_t b_cols){
+        thrust::device_vector<T> gpu_a(a.begin(), a.end());
+        thrust::device_vector<T> gpu_b(b.begin(), b.end());
+        thrust::device_vector<T> gpu_c(c.begin(), c.end());
 
-template<typename T, typename I>
-void matrixMultiplicationWrapper(
-        std::vector<T> a, std::vector<T> b, std::vector<T> c, bool transpose_a, bool transpose_b, I a_rows, I a_cols, I b_rows, I b_cols) {
-    cpu::matrixMultiplication(a, b, c, transpose_a, transpose_b, a_rows, a_cols, b_rows, b_cols);
-}
-
-void matrixMultiplicationWrapper(std::vector<uint64_t> a, std::vector<uint64_t> b, std::vector<uint64_t> c, bool transpose_a, 
-    bool transpose_b, size_t a_rows, size_t a_cols, size_t b_rows, size_t b_cols){
-        cpu::matrixMultiplication(a, b, c, transpose_a, transpose_b, a_rows, a_cols, b_rows, b_cols);
+        gpu::matrixMultiplication(
+            &gpu_a, &gpu_b, &gpu_c,
+            transpose_a, transpose_b, a_rows, a_cols, b_rows, b_cols
+        );
     }
+
+template void matrixMultiplicationWrapper(std::vector<uint64_t> a, std::vector<uint64_t> b, std::vector<uint64_t> c, bool transpose_a, 
+    bool transpose_b, size_t a_rows, size_t a_cols, size_t b_rows, size_t b_cols);
+
+template void matrixMultiplicationWrapper(std::vector<uint32_t> a, std::vector<uint32_t> b, std::vector<uint32_t> c, bool transpose_a, 
+    bool transpose_b, size_t a_rows, size_t a_cols, size_t b_rows, size_t b_cols);
+
+template void matrixMultiplicationWrapper(std::vector<uint16_t> a, std::vector<uint16_t> b, std::vector<uint16_t> c, bool transpose_a, 
+    bool transpose_b, size_t a_rows, size_t a_cols, size_t b_rows, size_t b_cols);
+
+template void matrixMultiplicationWrapper(std::vector<uint8_t> a, std::vector<uint8_t> b, std::vector<uint8_t> c, bool transpose_a, 
+    bool transpose_b, size_t a_rows, size_t a_cols, size_t b_rows, size_t b_cols);
+
+template void matrixMultiplicationWrapper(std::vector<int> a, std::vector<int> b, std::vector<int> c, bool transpose_a, 
+    bool transpose_b, size_t a_rows, size_t a_cols, size_t b_rows, size_t b_cols);
+
+template void matrixMultiplicationWrapper(std::vector<float> a, std::vector<float> b, std::vector<float> c, bool transpose_a, 
+    bool transpose_b, size_t a_rows, size_t a_cols, size_t b_rows, size_t b_cols);
+
+
